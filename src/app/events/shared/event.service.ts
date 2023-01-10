@@ -1,28 +1,80 @@
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { EventEmitter, Injectable } from '@angular/core';
+import { catchError, Observable, of, Subject } from 'rxjs';
+import { IEvent, ISession } from './event.model';
 
 @Injectable()
 export class EventService {
-  // constructor(private http: Http) {}
-  getEvents() {
-    let subject = new Subject();
-    setTimeout(() => {
-      subject.next(EVENTS);
-      subject.complete();
-    }, 100);
-    return subject;
+  constructor(private http: HttpClient) {}
+
+  getEvents(): Observable<IEvent[]> {
+    return this.http
+      .get<IEvent[]>('/api/events')
+      .pipe(catchError(this.handleError<IEvent[]>('getEvents', [])));
   }
 
-  getEvent(id: number) {
-    return EVENTS.find((event) => event.id === id);
+  getEvent(id: number): Observable<IEvent> {
+    return this.http
+      .get<IEvent>('/api/events/' + id)
+      .pipe(catchError(this.handleError<IEvent>('getEvent')));
+  }
+
+  saveEvent(event: IEvent) {
+    let options = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };
+    return this.http
+      .post<IEvent>('/api/events', event, options)
+      .pipe(catchError(this.handleError<IEvent>('saveEvent')));
+  }
+
+  searchSessions(searchTerm: string): Observable<ISession[]> {
+    return this.http
+      .get<ISession[]>('/api/sessions/search?=' + searchTerm)
+      .pipe(catchError(this.handleError<ISession[]>('saveEvent')));
+  }
+
+  // -- old
+  // updateEvent(event: IEvent) {
+  //   let index = EVENTS.findIndex((x) => (x.id = event.id));
+  //   EVENTS[index] = event;
+  // }
+
+  // searchSessions(searchTerm: string) {
+  //   const term = searchTerm.toLocaleLowerCase();
+  //   let results: ISession[] = [];
+
+  //   EVENTS.forEach((event) => {
+  //     let matchingSessions = event.sessions.filter(
+  //       (session) => session.name.toLocaleLowerCase().indexOf(term) > -1
+  //     );
+  //     matchingSessions = matchingSessions.map((session: any) => {
+  //       session.eventId = event.id;
+  //       return session;
+  //     });
+  //     results = results.concat(matchingSessions);
+  //   });
+
+  //   const emitter = new EventEmitter(true);
+  //   setTimeout(() => {
+  //     emitter.emit(results);
+  //   }, 100);
+  //   return emitter;
+  //}
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.log(error);
+      return of(result as T);
+    };
   }
 }
 
-const EVENTS = [
+const EVENTS: IEvent[] = [
   {
     id: 1,
     name: 'Angular Connect',
-    date: '9/26/2036',
+    date: new Date('9/26/2036'),
     time: '10:00 am',
     price: 599.99,
     imageUrl: '/assets/images/angularconnect-shield.png',
@@ -100,7 +152,7 @@ const EVENTS = [
   {
     id: 2,
     name: 'ng-nl',
-    date: '4/15/2037',
+    date: new Date('4/15/2037'),
     time: '9:00 am',
     price: 950.0,
     imageUrl: '/assets/images/ng-nl.png',
@@ -161,7 +213,7 @@ const EVENTS = [
   {
     id: 3,
     name: 'ng-conf 2037',
-    date: '5/4/2037',
+    date: new Date('5/4/2037'),
     time: '9:00 am',
     price: 759.0,
     imageUrl: '/assets/images/ng-conf.png',
@@ -243,7 +295,7 @@ const EVENTS = [
   {
     id: 4,
     name: 'UN Angular Summit',
-    date: '6/10/2037',
+    date: new Date('6/10/2037'),
     time: '8:00 am',
     price: 800.0,
     imageUrl: '/assets/images/basic-shield.png',
@@ -292,7 +344,7 @@ const EVENTS = [
   {
     id: 5,
     name: 'ng-vegas',
-    date: '2/10/2037',
+    date: new Date('2/10/2037'),
     time: '9:00 am',
     price: 400.0,
     imageUrl: '/assets/images/ng-vegas.png',

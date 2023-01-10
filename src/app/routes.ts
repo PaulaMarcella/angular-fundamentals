@@ -4,9 +4,10 @@ import { CreateEventComponent } from './events/create-event.component';
 
 import {
   EventDetailsComponent,
-  EventRouteActivator,
   EventListResolver,
   EventsListComponent,
+  CreateSessionComponent,
+  EventResolver,
 } from './events/index';
 
 export const appRoutes: Routes = [
@@ -23,7 +24,14 @@ export const appRoutes: Routes = [
   {
     path: 'events/:id',
     component: EventDetailsComponent,
-    canActivate: [EventRouteActivator],
+    // replaced by event route resolver
+    // canActivate: [EventRouteActivator],
+    resolve: { event: EventResolver },
+  },
+  {
+    path: 'events/session/new',
+    component: CreateSessionComponent,
+    pathMatch: 'full',
   },
   { path: '404', component: Error404Component },
   { path: '', redirectTo: '/events', pathMatch: 'full' },
